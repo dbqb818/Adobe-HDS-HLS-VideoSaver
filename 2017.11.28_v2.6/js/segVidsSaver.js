@@ -74,63 +74,10 @@ chrome.storage.local.get(null, function(items) {
                     a.title = key;
                     a.text = key;
 
-                    (function(key) {
-                        a.onclick = function() {
-                            var myBlobBuilder = new MyBlobBuilder();                    
-                            var requestsCount = 0;
-                            var xhr = [];
-                            // update UI                            
-                            updateHTML.showProgressWindow(items.slices[key].length);
-                            for (var i = 0; i < items.slices[key].length; i++) {
-                                (function (i) {
-                                    xhr[i] = new XMLHttpRequest();
-                                    xhr[i].open("GET", items.slices[key][i], true);
-                                    xhr[i].onreadystatechange = function() {
-                                        if (xhr[i].readyState == 4) {
-                                            
-                                            if (xhr[i].status == 200) { 
-                                                                                                                                          
-                                                requestsCount++; 
-                                                
-                                                myBlobBuilder.append(xhr[i].response, i); 
-                                                
-                                                if (requestsCount == items.slices[key].length) {
-
-                                                    myBlobBuilder.sort();
-
-                                                    var bb = myBlobBuilder.getBlob("video/mp2t");
-                                                                                                        
-                                                    // all done                                                    
-                                                    updateHTML.displayAllDone();
-                                                    saveData(bb, "video");                                            
-                                                }
-                                            }
-                                            else {            
-                                                console.log(xhr[i].status);
-                                                //error
-                                                //updateHTML.displayError();                                               
-                                            }
-                                        }
-                                    };
-                                    
-                                    // update UI
-                                    xhr[i].onprogress = function(e) {
-                                       //if (e.lengthComputable) {
-                                            updateHTML.initProgressBar(e.total, e.loaded, i+1);
-                                      //  }
-                                    };
-                                    xhr[i].onloadstart = function(e) {
-                                        updateHTML.startProgressBar(e, i+1);
-                                    };
-                                    xhr[i].onloadend = function(e) {
-                                        updateHTML.endProgressBar(e.loaded, i+1);
-                                    };
-                                    xhr[i].responseType = "blob";
-                                    xhr[i].send();
-                                })(i);
-                            }                    
-                        }
-                    })(key);
+                    a.onclick = window.adobeHdsHlsVideoSaver.downloadSlices.bind(null, {
+                        slices: items.slices,
+                        url: key
+                    });
 
                     document.getElementById('hlsLinks').appendChild(a);
 
