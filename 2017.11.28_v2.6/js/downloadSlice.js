@@ -37,11 +37,13 @@ exports.downloadSlices = function(opt) {
                         xhr[i].loaded === xhr[i].total;
                     if (!fullDownload) {
                         console.log('Length mismatch', xhr[i].total, xhr[i].loaded);
+                        updateHTML.errorProgressBar(i+1);
                         setTimeout(downloadSlice.bind(null, i), 2000);
                         return;
                     }
                     requestsCount++;
                     myBlobBuilder.append(xhr[i].response, i);
+                    updateHTML.successProgressBar(i+1);
                     if (requestsCount === mySlices.length) {
                         myBlobBuilder.sort();
                         var bb = myBlobBuilder.getBlob("video/mp2t");
@@ -52,6 +54,7 @@ exports.downloadSlices = function(opt) {
                 } else {
                     console.log(`Failed, ts index: ${i}, ts url ${mySlices[i]}`);
                     console.log('Failed', xhr[i].total, xhr[i].loaded, xhr[i]);
+                    updateHTML.errorProgressBar(i+1);
                     setTimeout(downloadSlice.bind(null, i), 2000);
                 }
             }
@@ -65,6 +68,9 @@ exports.downloadSlices = function(opt) {
         xhr[i].onloadstart = function(e) {
             updateHTML.startProgressBar(e, i+1);
             xhr[i].total = e.total;
+        };
+        xhr[i].onloadend = function(e) {
+            updateHTML.endProgressBar(e.loaded, i+1);
         };
         xhr[i].responseType = "blob";
         xhr[i].send();
