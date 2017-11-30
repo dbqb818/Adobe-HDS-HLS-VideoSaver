@@ -89,16 +89,12 @@ chrome.storage.local.get(null, function(items) {
 
                     (function(key) {
                         a.onclick = function() {
-
                             var myBlobBuilder = new MyBlobBuilder();                    
                             var requestsCount = 0;
                             var xhr = [];
-
                             // update UI                            
                             updateHTML.showProgressWindow(items.slices[key].length);
-                            
-                            
-                            for (var i = 0; i < items.slices[key].length; i++){
+                            for (var i = 0; i < items.slices[key].length; i++) {
                                 (function (i) {
                                     xhr[i] = new XMLHttpRequest();
                                     xhr[i].open("GET", items.slices[key][i], true);
@@ -144,12 +140,11 @@ chrome.storage.local.get(null, function(items) {
                                     };
                                     xhr[i].responseType = "blob";
                                     xhr[i].send();
-                                    })(i);
-                                }                    
-                            }
-                        })(key);
+                                })(i);
+                            }                    
+                        }
+                    })(key);
 
-                    
                     document.getElementById('hlsLinks').appendChild(a);
 
                     var br = document.createElement('br');
