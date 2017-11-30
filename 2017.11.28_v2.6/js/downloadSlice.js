@@ -27,13 +27,19 @@ exports.downloadSlices = function(opt) {
     }
 
     function downloadSlice(i) {
-        let logTemplate = `for manifest: ${url}, ts index: ${i}, ts url ${mySlices[i]}`;
         xhr[i] = new XMLHttpRequest();
         xhr[i].open("GET", mySlices[i], true);
         xhr[i].onreadystatechange = function() {
             if (xhr[i].readyState == 4) {
                 if (xhr[i].status == 200) {
-                    console.log('Success', logTemplate, xhr[i]);
+                    console.log(`Done, ts index: ${i}, ts url ${mySlices[i]}`);
+                    let fullDownload = Number.isInteger(xhr[i].total) &&
+                        xhr[i].loaded === xhr[i].total;
+                    if (!fullDownload) {
+                        console.log('Length mismatch', xhr[i].total, xhr[i].loaded);
+                        setTimeout(downloadSlice.bind(null, i), 2000);
+                        return;
+                    }
                     requestsCount++;
                     myBlobBuilder.append(xhr[i].response, i);
                     if (requestsCount === mySlices.length) {
@@ -44,19 +50,21 @@ exports.downloadSlices = function(opt) {
                         exports.saveData(bb, "video");
                     }
                 } else {
-                    console.log('Failed', logTemplate, xhr[i]);
+                    console.log(`Failed, ts index: ${i}, ts url ${mySlices[i]}`);
+                    console.log('Failed', xhr[i].total, xhr[i].loaded, xhr[i]);
+                    setTimeout(downloadSlice.bind(null, i), 2000);
                 }
             }
         };
         // update UI
         xhr[i].onprogress = function(e) {
             updateHTML.initProgressBar(e.total, e.loaded, i+1);
+            xhr[i].total = e.total;
+            xhr[i].loaded = e.loaded;
         };
         xhr[i].onloadstart = function(e) {
             updateHTML.startProgressBar(e, i+1);
-        };
-        xhr[i].onloadend = function(e) {
-            updateHTML.endProgressBar(e.loaded, i+1);
+            xhr[i].total = e.total;
         };
         xhr[i].responseType = "blob";
         xhr[i].send();
