@@ -66,12 +66,17 @@
     };
     
     updateHTML.endProgressBar = function(val, num) {
-        
         if (progressBars[num]) {
             progressBars[num].value = val;
         }
     };
     
+    updateHTML.successProgressBar = function(num) {
+        if (progressBars[num]) {
+            progressBars[num].classList.remove('red');
+        }
+    }
+
     updateHTML.displayAllDone = function() {
         var partSpan = document.createElement('span');
         partSpan.innerHTML = 'All parts downloaded.';
@@ -80,6 +85,11 @@
        // stopSpin();
     };
     
+    updateHTML.errorProgressBar = function(num) {
+        if (progressBars[num]) {
+            progressBars[num].classList.add('red');
+        }
+    };
     
 //    updateHTML.displayError() = function() {
 //        var partSpan = document.createElement('span');

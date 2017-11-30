@@ -63,3 +63,7 @@
 }
 
 #hlsProcess > span > img { height:20px;}
+
+progress.red { background: red; }
+progress.red::-webkit-progress-bar-value { background-color:red; }
+progress.red::-webkit-progress-value { background-color:red; }
