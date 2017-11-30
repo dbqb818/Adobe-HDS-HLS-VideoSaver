@@ -66,9 +66,9 @@
     };
     
     updateHTML.endProgressBar = function(val, num) {
-        
         if (progressBars[num]) {
             progressBars[num].value = val;
+            progressBars[num].classList.remove('red');
         }
     };
     
@@ -80,6 +80,11 @@
        // stopSpin();
     };
     
+    updateHTML.errorProgressBar = function(num) {
+        if (progressBars[num]) {
+            progressBars[num].classList.add('red');
+        }
+    };
     
 //    updateHTML.displayError() = function() {
 //        var partSpan = document.createElement('span');
