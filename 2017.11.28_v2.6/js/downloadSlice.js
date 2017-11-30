@@ -11,7 +11,7 @@ exports.saveData = function (blob, fileName) {
     a.href = url;
     a.download = fileName + '.ts';
     a.click();
-    window.URL.revokeObjectURL(url);    
+    window.URL.revokeObjectURL(url);
 };
 
 exports.downloadSlices = function(opt) {
@@ -27,23 +27,24 @@ exports.downloadSlices = function(opt) {
     }
 
     function downloadSlice(i) {
+        let logTemplate = `for manifest: ${url}, ts index: ${i}, ts url ${mySlices[i]}`;
         xhr[i] = new XMLHttpRequest();
         xhr[i].open("GET", mySlices[i], true);
         xhr[i].onreadystatechange = function() {
             if (xhr[i].readyState == 4) {
-                if (xhr[i].status == 200) {                                                                        
-                    requestsCount++; 
+                if (xhr[i].status == 200) {
+                    console.log('Success', logTemplate, xhr[i]);
+                    requestsCount++;
                     myBlobBuilder.append(xhr[i].response, i);
                     if (requestsCount === mySlices.length) {
                         myBlobBuilder.sort();
-                        var bb = myBlobBuilder.getBlob("video/mp2t");                               
-                        // all done                                                    
+                        var bb = myBlobBuilder.getBlob("video/mp2t");
+                        // all done
                         updateHTML.displayAllDone();
-                        exports.saveData(bb, "video");                             
+                        exports.saveData(bb, "video");
                     }
                 } else {
-                    console.log(`Download failed for manifest: ${url},
-                        ts index: ${i}, ts url ${mySlices[i]}`, xhr[i]);                       
+                    console.log('Failed', logTemplate, xhr[i]);
                 }
             }
         };
