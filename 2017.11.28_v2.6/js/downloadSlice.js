@@ -36,6 +36,7 @@ exports.downloadSlices = function(opt) {
             else {
                 setTimeout(downloadSlice.bind(null, i), 2000);
                 retryCounts[i]++;
+                return true;
             }
         }
         xhr[i] = new XMLHttpRequest();
