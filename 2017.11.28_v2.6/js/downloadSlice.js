@@ -18,6 +18,7 @@ exports.downloadSlices = function(opt) {
     let url = opt.url, slices = opt.slices, mySlices = slices[url];
     var myBlobBuilder = new MyBlobBuilder();
     var requestsCount = 0;
+    var retryCounts = [];
     var xhr = [];
     
     updateHTML.showProgressWindow(mySlices.length);
@@ -27,6 +28,16 @@ exports.downloadSlices = function(opt) {
     }
 
     function downloadSlice(i) {
+        function handleErr(i) {
+            const RETRY_LIMIT = 5;
+            updateHTML.errorProgressBar(i+1);
+            if (retryCounts[i] > RETRY_LIMIT)
+                return false;
+            else {
+                setTimeout(downloadSlice.bind(null, i), 2000);
+                retryCounts[i]++;
+            }
+        }
         xhr[i] = new XMLHttpRequest();
         xhr[i].open("GET", mySlices[i], true);
         xhr[i].onreadystatechange = function() {
@@ -37,9 +48,8 @@ exports.downloadSlices = function(opt) {
                         xhr[i].loaded === xhr[i].total;
                     if (!fullDownload) {
                         console.log('Length mismatch', xhr[i].total, xhr[i].loaded);
-                        updateHTML.errorProgressBar(i+1);
-                        setTimeout(downloadSlice.bind(null, i), 2000);
-                        return;
+                        if (handleErr(i))
+                            return;
                     }
                     requestsCount++;
                     myBlobBuilder.append(xhr[i].response, i);
@@ -54,8 +64,9 @@ exports.downloadSlices = function(opt) {
                 } else {
                     console.log(`Failed, ts index: ${i}, ts url ${mySlices[i]}`);
                     console.log('Failed', xhr[i].total, xhr[i].loaded, xhr[i]);
-                    updateHTML.errorProgressBar(i+1);
-                    setTimeout(downloadSlice.bind(null, i), 2000);
+                    // if it failed but we decide not to retry, just increment count
+                    if (!handleErr(i))
+                        requestsCount++;
                 }
             }
         };
