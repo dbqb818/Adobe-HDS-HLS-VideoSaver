@@ -35,7 +35,8 @@ exports.downloadSlices = function(opt) {
                 return false;
             else {
                 setTimeout(downloadSlice.bind(null, i), 2000);
-                retryCounts[i]++;
+                retryCounts[i] = retryCounts[i] ? retryCounts[i]+1 : 1;
+                return true;
             }
         }
         xhr[i] = new XMLHttpRequest();
@@ -51,22 +52,22 @@ exports.downloadSlices = function(opt) {
                         if (handleErr(i))
                             return;
                     }
-                    requestsCount++;
-                    myBlobBuilder.append(xhr[i].response, i);
                     updateHTML.successProgressBar(i+1);
-                    if (requestsCount === mySlices.length) {
-                        myBlobBuilder.sort();
-                        var bb = myBlobBuilder.getBlob("video/mp2t");
-                        // all done
-                        updateHTML.displayAllDone();
-                        exports.saveData(bb, "video");
-                    }
+                    myBlobBuilder.append(xhr[i].response, i);
                 } else {
                     console.log(`Failed, ts index: ${i}, ts url ${mySlices[i]}`);
                     console.log('Failed', xhr[i].total, xhr[i].loaded, xhr[i]);
                     // if it failed but we decide not to retry, just increment count
-                    if (!handleErr(i))
-                        requestsCount++;
+                    if (handleErr(i))
+                        return;
+                }
+                requestsCount++;
+                if (requestsCount === mySlices.length) {
+                    myBlobBuilder.sort();
+                    var bb = myBlobBuilder.getBlob("video/mp2t");
+                    // all done
+                    updateHTML.displayAllDone();
+                    exports.saveData(bb, "video");
                 }
             }
         };
